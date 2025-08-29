@@ -1,22 +1,30 @@
-'use client';
-
-import { useIdleTimer } from 'react-idle-timer';
+// apps/web/src/__create/useDevServerHeartbeat.ts
+// Client-only heartbeat to keep the dev server alive without react-idle-timer.
 
 export function useDevServerHeartbeat() {
-  useIdleTimer({
-    throttle: 60_000 * 3,
-    timeout: 60_000,
-    onAction: () => {
-      // HACK: at time of writing, we run the dev server on a proxy url that
-      // when requested, ensures that the dev server's life is extended. If
-      // the user is using a page or is active in it in the app, but when the
-      // user has popped out their preview, they no longer can rely on the
-      // app to do this. This hook ensures it stays alive.
-      fetch('/', {
-        method: 'GET',
-      }).catch((error) => {
-        // this is a no-op, we just want to keep the dev server alive
+  if (typeof window === "undefined") {
+    // No-op on the server
+    return;
+  }
+
+  let lastActivity = Date.now();
+  const bump = () => { lastActivity = Date.now(); };
+
+  const events = ["mousemove", "keydown", "scroll", "touchstart", "visibilitychange"];
+  events.forEach((ev) => window.addEventListener(ev, bump, { passive: true }));
+
+  const interval = window.setInterval(() => {
+    // If there was activity in the last 60s, send a heartbeat
+    if (Date.now() - lastActivity < 60_000) {
+      fetch("/api/__create/heartbeat", { method: "POST" }).catch(() => {
+        // no-op: best-effort ping
       });
-    },
-  });
+    }
+  }, 30_000);
+
+  // Optional cleanup API if your app calls it on unmount
+  return () => {
+    clearInterval(interval);
+    events.forEach((ev) => window.removeEventListener(ev, bump));
+  };
 }
