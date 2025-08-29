@@ -373,13 +373,14 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
-        <script type="module" src="/src/__create/dev-error-overlay.js"></script>
-        <link rel="icon" href="/src/__create/favicon.png" />
+        {import.meta.env.DEV && (
+          <script type="module" src="/src/__create/dev-error-overlay.js"></script>
+        )}
         <LoadFonts />
       </head>
       <body>
         <ClientOnly loader={() => children} />
-        <HotReloadIndicator />
+        {import.meta.env.DEV && <HotReloadIndicator />}
         <Toaster position="bottom-right" />
         <ScrollRestoration />
         <Scripts />
@@ -390,9 +391,12 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
-  return (
-    <SessionProvider>
-      <Outlet />
-    </SessionProvider>
-  );
+  if (import.meta.env.DEV) {
+    return (
+      <SessionProvider>
+        <Outlet />
+      </SessionProvider>
+    );
+  }
+  return <Outlet />;
 }

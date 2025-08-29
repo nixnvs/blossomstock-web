@@ -2,8 +2,8 @@
 // Client-only heartbeat to keep the dev server alive without react-idle-timer.
 
 export function useDevServerHeartbeat() {
-  if (typeof window === "undefined") {
-    // No-op on the server
+  if (typeof window === "undefined" || !import.meta.env.DEV) {
+    // No-op on the server or in production builds
     return;
   }
 
