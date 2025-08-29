@@ -5,8 +5,8 @@
 	"scripts": {
 	  "dev": "react-router dev",
 	  "typecheck": "react-router typegen && tsc --noEmit",
-	  "build": "react-router build && rm -rf dist && mkdir -p dist && cp -R build/client/* ./dist/",
-	  "serve": "react-router serve dist --port 3000",
+	  "build": "react-router build",
+	  "preview": "npx serve -s build/client -l 4173",
 	  "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
 	  "test": "vitest"
 	},
